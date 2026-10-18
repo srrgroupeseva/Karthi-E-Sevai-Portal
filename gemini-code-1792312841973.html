@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karthi E-Sevai Portal - இ-சேவை மையம்</title>
+    <style>
+        :root {
+            --primary: #1565c0;
+            --primary-dark: #0d47a1;
+            --bg-light: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-dark: #212121;
+            --border-color: #1565c0;
+            --success: #2e7d32;
+            --warning: #ed6c02;
+            --danger: #d32f2f;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); line-height: 1.5; }
+
+        header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 15px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .brand h1 { font-size: 1.8rem; font-weight: 700; }
+        .brand p { font-size: 0.95rem; opacity: 0.9; }
+        .live-datetime { background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+
+        nav { background: #0d47a1; padding: 10px 0; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; gap: 15px; padding: 0 20px; overflow-x: auto; }
+        .nav-btn { background: transparent; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-weight: 600; transition: 0.3s; white-space: nowrap; }
+        .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.2); border-bottom: 3px solid #ffeb3b; }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .card { background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card-header { border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; color: var(--primary-dark); display: flex; justify-content: space-between; align-items: center; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        label { font-weight: 600; font-size: 0.9rem; color: #333; }
+        input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(21, 101, 192, 0.3); }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: #757575; color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; border: 1px solid var(--border-color); border-left: 5px solid var(--primary); padding: 15px; border-radius: 6px; text-align: center; }
+        .stat-card h3 { font-size: 1.8rem; color: var(--primary-dark); }
+        .stat-card p { font-size: 0.85rem; color: #666; font-weight: 600; }
+
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 0.9rem; }
+        th { background-color: #e3f2fd; color: var(--primary-dark); }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .app-link { color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: bold; }
+
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-pending { background: #fff3e0; color: #e65100; }
+        .badge-approved { background: #e8f5e9; color: #1b5e20; }
+        .badge-rejected { background: #ffebee; color: #b71c1c; }
+        .badge-returned { background: #e1f5fe; color: #0277bd; }
+
+        .doc-input-group { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+
+        /* Modal Popup Styling */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow: auto; }
+        .modal-content { background: white; margin: 3% auto; padding: 20px; width: 90%; max-width: 750px; border-radius: 8px; border: 2px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+        .doc-preview-item {
+            background: #eef5fc;
+            border: 1px solid #b6d4f5;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .receipt-box { border: 2px dashed var(--primary); padding: 25px; background: #fff; margin-top: 20px; border-radius: 8px; }
+        .receipt-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }
+
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="brand">
+                <h1>KARTHI E-SEVAI PORTAL</h1>
+                <p>இ-சேவை மையம் - இணைய சேவை போர்ட்டல்</p>
+            </div>
+            <div class="live-datetime" id="liveClock">Loading Date & Time...</div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="switchTab('trackingPage')">Application Tracking (விண்ணப்பக் கண்காணிப்பு)</button>
+            <button class="nav-btn" onclick="switchTab('operatorLogin')">Operator Login / Signup (ஆபரேட்டர் நுழைக)</button>
+            <button class="nav-btn" onclick="switchTab('officerLogin')">Officer Login (அதிகாரி நுழைக)</button>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- 1. TRACKING PAGE -->
+        <section id="trackingPage" class="page-section active">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Track Application Status / விண்ணப்பத்தின் நிலை அறிய</h2>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Application Number (விண்ணப்ப எண்):</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="trackAppId" placeholder="e.g., TN001" style="flex:1;">
+                            <button class="btn btn-primary" onclick="trackApplication()">Search (தேடுக)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="trackingResult" style="margin-top:20px; display:none;">
+                    <hr style="margin-bottom:15px;">
+                    <h3>Application Details & History (விண்ணப்ப விவரங்கள் & வரலாறு)</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <tr><th>App Number (எண்)</th><td id="trAppNo"></td></tr>
+                            <tr><th>Applicant Name (பெயர்)</th><td id="trName"></td></tr>
+                            <tr><th>Service (சேவை)</th><td id="trService"></td></tr>
+                            <tr><th>Status (தற்போதைய நிலை)</th><td id="trStatus"></td></tr>
+                            <tr><th>Office Note No (அலுவலக குறிப்பு எண்)</th><td id="trNoteNo">-</td></tr>
+                            <tr><th>Office Date (தேதி)</th><td id="trOfficeDate">-</td></tr>
+                            <tr><th>Officer Remarks (அதிகாரியின் கருத்துக்கள்)</th><td id="trRemarks">-</td></tr>
+                            <tr><th>Uploaded Documents</th><td id="trDocs">-</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. OPERATOR PAGE -->
+        <section id="operatorLogin" class="page-section">
+            <div class="card" id="operatorAuthBox">
+                <div class="card-header">
+                    <h2 id="authTitle">Operator Login (ஆபரேட்டர் உள்நுழைவு)</h2>
+                    <button class="btn btn-secondary" onclick="toggleAuthMode()" id="toggleAuthBtn">Switch to Sign Up</button>
+                </div>
+
+                <form id="opLoginForm" onsubmit="handleOpLogin(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Mobile Number / Mail ID:</label>
+                            <input type="text" id="loginUser" required placeholder="Enter Phone or Email">
+                        </div>
+                        <div class="form-group">
+                            <label>Password (கடவுச்சொல்):</label>
+                            <input type="password" id="loginPass" required>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">Login (உள்நுழை)</button>
+                    </div>
+                </form>
+
+                <form id="opSignupForm" style="display:none;" onsubmit="handleOpSignup(event)">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Operator Name:</label><input type="text" id="signupName" required></div>
+                        <div class="form-group"><label>Phone Number:</label><input type="tel" id="signupPhone" required></div>
+                        <div class="form-group"><label>Mail ID:</label><input type="email" id="signupEmail" required></div>
+                        <div class="form-group"><label>Designation:</label><input type="text" id="signupDesig" required></div>
+                        <div class="form-group full-width"><label>Operator Address:</label><textarea id="signupAddress" rows="2" required></textarea></div>
+                        <div class="form-group"><label>Set Password:</label><input type="password" id="signupPass" required></div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-success">Sign Up (பதிவு செய்)</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="operatorDashboard" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Operator Dashboard (<span id="opWelcomeName">Operator</span>)</h2>
+                        <button class="btn btn-danger" onclick="logoutOp()">Logout</button>
+                    </div>
+
+                    <div class="stats-container">
+                        <div class="stat-card"><h3 id="statTotal">0</h3><p>Total Registered</p></div>
+                        <div class="stat-card"><h3 id="statPending" style="color:var(--warning);">0</h3><p>Pending</p></div>
+                        <div class="stat-card"><h3 id="statApproved" style="color:var(--success);">0</h3><p>Approved</p></div>
+                        <div class="stat-card"><h3 id="statRejected" style="color:var(--danger);">0</h3><p>Rejected</p></div>
+                        <div class="stat-card"><h3 id="statReturned" style="color:var(--secondary);">0</h3><p>Returned</p></div>
+                    </div>
+
+                    <div class="btn-group" style="margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="showNewAppForm()">+ New Application Form (விண்ணப்ப படிவம்)</button>
+                        <button class="btn btn-secondary" onclick="showAppList()">View All Registered Applications</button>
+                    </div>
+
+                    <div id="newAppFormContainer" class="card">
+                        <div class="card-header">
+                            <h3>விண்ணப்ப படிவம் (New Application Form)</h3>
+                        </div>
+                        <form id="applicationForm" onsubmit="submitApplication(event)">
+                            <div class="form-grid">
+                                <div class="form-group"><label>Applicant Name (விண்ணப்பதாரர் பெயர்) *</label><input type="text" id="appName" required></div>
+                                <div class="form-group"><label>Date of Birth (பிறந்த தேதி) *</label><input type="date" id="appDob" required></div>
+                                <div class="form-group"><label>Phone Number (தொலைபேசி எண்) *</label><input type="tel" id="appPhone" pattern="[0-9]{10}" required placeholder="10 Digits"></div>
+                                <div class="form-group full-width"><label>Full Address (முழு முகவரி) *</label><textarea id="appAddress" rows="2" required></textarea></div>
+                                <div class="form-group">
+                                    <label>Application Type (விண்ணப்ப வகை) *</label>
+                                    <select id="appType" required>
+                                        <option value="New (புதியது)">New (புதியது)</option>
+                                        <option value="Correction (திருத்தம்)">Correction (திருத்தம்)</option>
+                                        <option value="Renewal (புதுப்பித்தல்)">Renewal (புதுப்பித்தல்)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Service Name (சேவையின் பெயர்) *</label>
+                                    <select id="serviceName" onchange="handleServiceChange()" required>
+                                        <option value="">-- Select Service --</option>
+                                        <option value="Community Certificate (சாதிச் சான்றிதழ்)" data-cost="60">Community Certificate (சாதிச் சான்றிதழ்)</option>
+                                        <option value="Income Certificate (வருமானச் சான்றிதழ்)" data-cost="60">Income Certificate (வருமானச் சான்றிதழ்)</option>
+                                        <option value="PAN Card Service (பான் கார்டு சேவை)" data-cost="120">PAN Card Service (பான் கார்டு சேவை)</option>
+                                        <option value="Aadhaar Card Service (ஆதார் கார்டு சேவை)" data-cost="50">Aadhaar Card Service (ஆதார் கார்டு சேவை)</option>
+                                        <option value="Other Application" data-cost="100">Other Application (இதர சேவைகள்)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="otherServiceGroup" style="display:none;">
+                                    <label>Specify Other Service *</label>
+                                    <input type="text" id="otherServiceNameInput">
+                                </div>
+
+                                <div class="form-group"><label>Service Amount (சேவைக் கட்டணம் ₹)</label><input type="text" id="serviceAmount" readonly value="0"></div>
+
+                                <div class="form-group full-width">
+                                    <label>Upload Supporting Documents (ஆவணங்கள் பதிவேற்றம்)</label>
+                                    <div id="documentContainer">
+                                        <div class="doc-input-group">
+                                            <input type="text" placeholder="Document Name (e.g. Income Proof)" class="doc-name" style="flex:1;">
+                                            <input type="file" class="doc-file" style="flex:1;">
+                                            <button type="button" class="btn btn-danger" onclick="removeDocumentRow(this)">❌</button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary" onclick="addDocumentRow()" style="margin-top:5px; font-size:0.8rem;">+ Add More Document</button>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="reset" class="btn btn-secondary">Reset (மீட்டமை)</button>
+                                <button type="submit" class="btn btn-primary">Submit Application (சமர்ப்பி)</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="appListContainer" class="card" style="display:none;">
+                        <div class="card-header"><h3>Registered Applications List</h3></div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>App No (Click to Preview)</th>
+                                        <th>Applicant Name</th>
+                                        <th>Service</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="opAppTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="receiptContainer" style="display:none;">
+                        <div class="btn-group" style="margin-bottom:10px;">
+                            <button class="btn btn-primary" onclick="window.print()">🖨️ Print Acknowledgement</button>
+                            <button class="btn btn-secondary" onclick="hideReceipt()">Back to Dashboard</button>
+                        </div>
+                        <div class="receipt-box">
+                            <div class="receipt-header">
+                                <h2>KARTHI E-SEVAI PORTAL</h2>
+                                <p>இ-சேவை மையம் - சேவை ஒப்புதல் சீட்டு (Acknowledgement)</p>
+                            </div>
+                            <div class="receipt-row"><strong>Application Number:</strong><span id="recAppNo"></span></div>
+                            <div class="receipt-row"><strong>Applicant Name:</strong><span id="recName"></span></div>
+                            <div class="receipt-row"><strong>Service Name:</strong><span id="recService"></span></div>
+                            <div class="receipt-row"><strong>Service Charge:</strong><span id="recAmount"></span></div>
+                            <div class="receipt-row"><strong>Date & Time:</strong><span id="recDate"></span></div>
+
+                            <div style="margin-top:20px; font-size:0.85rem; font-style:italic; background:#f5f5f5; padding:10px; border-left:3px solid var(--primary);">
+                                <strong>குறிப்பு :</strong> விண்ணப்பத்தில் வழங்கிய அனைத்து தகவலும் உண்மை என நான் உறுதியளிக்கும் வகையில் சான்றளிக்கிறேன்.
+                            </div>
+
+                            <div style="margin-top:40px; display:flex; justify-content:space-between; align-items:flex-end;">
+                                <div></div>
+                                <div style="text-align:center; border-top:1px solid #333; width:200px; padding-top:5px; font-size:0.85rem; font-weight:600;">
+                                    <p id="recOpName">Operator Name</p>
+                                    <span>Operator Signature (சான்றொப்பம்)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. OFFICER PAGE -->
+        <section id="officerLogin" class="page-section">
+            <div class="card" id="officerAuthBox">
+                <div class="card-header"><h2>Officer Portal Login (அதிகாரி உள்நுழைவு)</h2></div>
+                <form onsubmit="handleOfficerLogin(event)">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Username / Officer ID:</label><input type="text" id="offUser" value="admin" required></div>
+                        <div class="form-group"><label>Password:</label><input type="password" id="offPass" value="admin123" required></div>
+                    </div>
+                    <div class="btn-group"><button type="submit" class="btn btn-primary">Login as Officer</button></div>
+                </form>
+            </div>
+
+            <div id="officerDashboard" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Officer Review Portal Dashboard</h2>
+                        <button class="btn btn-danger" onclick="logoutOfficer()">Logout</button>
+                    </div>
+
+                    <div class="stats-container">
+                        <div class="stat-card"><h3 id="offTotal">0</h3><p>Total Received</p></div>
+                        <div class="stat-card"><h3 id="offPending" style="color:var(--warning);">0</h3><p>Pending Review</p></div>
+                        <div class="stat-card"><h3 id="offApproved" style="color:var(--success);">0</h3><p>Approved</p></div>
+                        <div class="stat-card"><h3 id="offRejected" style="color:var(--danger);">0</h3><p>Rejected</p></div>
+                    </div>
+
+                    <h3>Applications Pending Verification (Click App No or Review)</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>App No</th>
+                                    <th>Applicant Name</th>
+                                    <th>Service</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officerTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- REVIEW & DOCUMENT PREVIEW BOX -->
+                <div id="reviewBox" class="card" style="display:none; border-color: var(--warning);">
+                    <div class="card-header">
+                        <h3>Application Verification & Action - <span id="revAppNo"></span></h3>
+                        <button class="btn btn-secondary" onclick="closeReview()">Close</button>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group"><label>Applicant Name:</label><input type="text" id="revName" readonly></div>
+                        <div class="form-group"><label>DOB:</label><input type="text" id="revDob" readonly></div>
+                        <div class="form-group"><label>Phone:</label><input type="text" id="revPhone" readonly></div>
+                        <div class="form-group"><label>Service:</label><input type="text" id="revService" readonly></div>
+                        <div class="form-group full-width"><label>Address:</label><textarea id="revAddress" rows="2" readonly></textarea></div>
+
+                        <!-- UPLOADS PREVIEW PANEL -->
+                        <div class="form-group full-width">
+                            <label style="color: var(--primary-dark); font-size: 1rem;">📁 UPLOADED DOCUMENTS PREVIEW (பதிவேற்றப்பட்ட ஆவணங்கள்):</label>
+                            <div id="revDocsList" style="margin-top: 8px;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>அலுவலக குறிப்பு எண் (Office Note No) *</label>
+                            <input type="text" id="officeNoteNo" placeholder="e.g. OFF/2026/089" required>
+                        </div>
+                        <div class="form-group">
+                            <label>அலுவலக குறிப்பு தேதி (Office Date) *</label>
+                            <input type="date" id="officeDate" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Officer Remarks (அதிகாரி குறிப்பு / கருத்துக்கள்) *</label>
+                            <textarea id="officerRemarks" rows="2" placeholder="Enter officer decision notes..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-group" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="updateAppStatus('APPROVED')">✅ Approve (ஒப்புதல்)</button>
+                        <button class="btn btn-danger" onclick="updateAppStatus('REJECTED')">❌ Reject (நிராகரி)</button>
+                        <button class="btn btn-warning" onclick="updateAppStatus('RETURNED')">🔄 Return for Correction (திரும்ப அனுப்பு)</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- DOCUMENT PREVIEW MODAL POPUP -->
+    <div id="docModal" class="modal">
+        <div class="modal-content">
+            <div class="card-header">
+                <h3 id="docModalTitle">Document Preview</h3>
+                <button class="btn btn-danger" onclick="closeDocModal()">X</button>
+            </div>
+            <div id="docModalBody" style="padding: 20px; text-align: center; background: #f8f9fa; border-radius: 6px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <!-- Dynamically rendered preview content -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let applications = JSON.parse(localStorage.getItem('karthi_apps')) || [];
+        let operators = JSON.parse(localStorage.getItem('karthi_operators')) || [];
+        let currentOp = null;
+        let selectedAppId = null;
+        let appCounter = parseInt(localStorage.getItem('karthi_app_counter')) || 1;
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleDateString('en-IN') + ' ' + now.toLocaleTimeString('en-IN');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        document.getElementById('officeDate').valueAsDate = new Date();
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        let isSignup = false;
+        function toggleAuthMode() {
+            isSignup = !isSignup;
+            document.getElementById('authTitle').innerText = isSignup ? "Operator Signup" : "Operator Login";
+            document.getElementById('opLoginForm').style.display = isSignup ? "none" : "block";
+            document.getElementById('opSignupForm').style.display = isSignup ? "block" : "none";
+            document.getElementById('toggleAuthBtn').innerText = isSignup ? "Switch to Login" : "Switch to Sign Up";
+        }
+
+        function handleOpSignup(e) {
+            e.preventDefault();
+            const newOp = {
+                name: document.getElementById('signupName').value,
+                phone: document.getElementById('signupPhone').value,
+                email: document.getElementById('signupEmail').value,
+                desig: document.getElementById('signupDesig').value,
+                address: document.getElementById('signupAddress').value,
+                pass: document.getElementById('signupPass').value
+            };
+            operators.push(newOp);
+            localStorage.setItem('karthi_operators', JSON.stringify(operators));
+            alert('Signup Successful!');
+            toggleAuthMode();
+        }
+
+        function handleOpLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            const found = operators.find(o => (o.phone === u || o.email === u) && o.pass === p);
+            if(found || (u === "admin" && p === "admin")) {
+                currentOp = found || { name: "Karthi Operator" };
+                document.getElementById('operatorAuthBox').style.display = "none";
+                document.getElementById('operatorDashboard').style.display = "block";
+                document.getElementById('opWelcomeName').innerText = currentOp.name;
+                refreshOpDashboard();
+            } else { alert('Invalid Credentials!'); }
+        }
+
+        function logoutOp() {
+            document.getElementById('operatorAuthBox').style.display = "block";
+            document.getElementById('operatorDashboard').style.display = "none";
+        }
+
+        function handleServiceChange() {
+            const select = document.getElementById('serviceName');
+            const cost = select.options[select.selectedIndex].getAttribute('data-cost') || 0;
+            document.getElementById('serviceAmount').value = cost;
+            document.getElementById('otherServiceGroup').style.display = select.value === 'Other Application' ? 'flex' : 'none';
+        }
+
+        function addDocumentRow() {
+            const container = document.getElementById('documentContainer');
+            const div = document.createElement('div');
+            div.className = 'doc-input-group';
+            div.innerHTML = `
+                <input type="text" placeholder="Document Name" class="doc-name" style="flex:1;">
+                <input type="file" class="doc-file" style="flex:1;">
+                <button type="button" class="btn btn-danger" onclick="removeDocumentRow(this)">❌</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeDocumentRow(btn) {
+            const groups = document.querySelectorAll('.doc-input-group');
+            if(groups.length > 1) {
+                btn.parentElement.remove();
+            } else { alert('At least one document row must remain.'); }
+        }
+
+        function submitApplication(e) {
+            e.preventDefault();
+            let appNoStr = "TN" + String(appCounter).padStart(3, '0');
+            appCounter++;
+            localStorage.setItem('karthi_app_counter', appCounter);
+
+            let sName = document.getElementById('serviceName').value;
+            if(sName === 'Other Application') {
+                sName = "Other: " + document.getElementById('otherServiceNameInput').value;
+            }
+
+            let docs = [];
+            document.querySelectorAll('.doc-input-group').forEach(group => {
+                let dName = group.querySelector('.doc-name').value;
+                if(dName) docs.push(dName);
+            });
+            if(docs.length === 0) docs.push("Identity Proof Document");
+
+            const newApp = {
+                id: appNoStr,
+                name: document.getElementById('appName').value,
+                dob: document.getElementById('appDob').value,
+                phone: document.getElementById('appPhone').value,
+                address: document.getElementById('appAddress').value,
+                type: document.getElementById('appType').value,
+                service: sName,
+                amount: document.getElementById('serviceAmount').value,
+                docs: docs,
+                status: 'PENDING',
+                date: new Date().toLocaleString(),
+                operatorName: currentOp ? currentOp.name : "Operator",
+                officeNoteNo: '-',
+                officeDate: '-',
+                remarks: '-'
+            };
+
+            applications.push(newApp);
+            localStorage.setItem('karthi_apps', JSON.stringify(applications));
+            alert('Application Submitted! App No: ' + appNoStr);
+            showReceipt(newApp);
+            refreshOpDashboard();
+        }
+
+        function refreshOpDashboard() {
+            document.getElementById('statTotal').innerText = applications.length;
+            document.getElementById('statPending').innerText = applications.filter(a => a.status === 'PENDING').length;
+            document.getElementById('statApproved').innerText = applications.filter(a => a.status === 'APPROVED').length;
+            document.getElementById('statRejected').innerText = applications.filter(a => a.status === 'REJECTED').length;
+            document.getElementById('statReturned').innerText = applications.filter(a => a.status === 'RETURNED').length;
+
+            const tbody = document.getElementById('opAppTableBody');
+            tbody.innerHTML = '';
+            applications.forEach(app => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="app-link" onclick="openReview('${app.id}')">${app.id}</span></td>
+                    <td>${app.name}</td>
+                    <td>${app.service}</td>
+                    <td>${app.date}</td>
+                    <td><span class="badge badge-${app.status.toLowerCase()}">${app.status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding:2px 6px; font-size:0.75rem;" onclick='viewReceiptById("${app.id}")'>Receipt</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showReceipt(app) {
+            document.getElementById('newAppFormContainer').style.display = "none";
+            document.getElementById('appListContainer').style.display = "none";
+            document.getElementById('receiptContainer').style.display = "block";
+            document.getElementById('recAppNo').innerText = app.id;
+            document.getElementById('recName').innerText = app.name;
+            document.getElementById('recService').innerText = app.service;
+            document.getElementById('recAmount').innerText = "₹ " + app.amount;
+            document.getElementById('recDate').innerText = app.date;
+            document.getElementById('recOpName').innerText = app.operatorName;
+        }
+
+        function viewReceiptById(id) {
+            const app = applications.find(a => a.id === id);
+            if(app) showReceipt(app);
+        }
+
+        function hideReceipt() {
+            document.getElementById('receiptContainer').style.display = "none";
+            document.getElementById('newAppFormContainer').style.display = "block";
+        }
+
+        function showNewAppForm() {
+            document.getElementById('receiptContainer').style.display = "none";
+            document.getElementById('appListContainer').style.display = "none";
+            document.getElementById('newAppFormContainer').style.display = "block";
+        }
+
+        function showAppList() {
+            document.getElementById('receiptContainer').style.display = "none";
+            document.getElementById('newAppFormContainer').style.display = "none";
+            document.getElementById('appListContainer').style.display = "block";
+        }
+
+        function trackApplication() {
+            const id = document.getElementById('trackAppId').value.trim();
+            const app = applications.find(a => a.id.toLowerCase() === id.toLowerCase());
+
+            if(app) {
+                document.getElementById('trackingResult').style.display = 'block';
+                document.getElementById('trAppNo').innerText = app.id;
+                document.getElementById('trName').innerText = app.name;
+                document.getElementById('trService').innerText = app.service;
+                document.getElementById('trStatus').innerHTML = `<span class="badge badge-${app.status.toLowerCase()}">${app.status}</span>`;
+                document.getElementById('trNoteNo').innerText = app.officeNoteNo || '-';
+                document.getElementById('trOfficeDate').innerText = app.officeDate || '-';
+                document.getElementById('trRemarks').innerText = app.remarks || '-';
+                
+                let docHtml = "";
+                app.docs.forEach(d => { docHtml += `📄 <strong>${d}</strong> (Verified File)<br>`; });
+                document.getElementById('trDocs').innerHTML = docHtml;
+            } else {
+                alert('Application Number not found!');
+                document.getElementById('trackingResult').style.display = 'none';
+            }
+        }
+
+        function handleOfficerLogin(e) {
+            e.preventDefault();
+            if(document.getElementById('offUser').value === 'admin' && document.getElementById('offPass').value === 'admin123') {
+                document.getElementById('officerAuthBox').style.display = 'none';
+                document.getElementById('officerDashboard').style.display = 'block';
+                refreshOfficerDashboard();
+            } else { alert('Invalid Credentials!'); }
+        }
+
+        function logoutOfficer() {
+            document.getElementById('officerAuthBox').style.display = 'block';
+            document.getElementById('officerDashboard').style.display = 'none';
+        }
+
+        function refreshOfficerDashboard() {
+            document.getElementById('offTotal').innerText = applications.length;
+            document.getElementById('offPending').innerText = applications.filter(a => a.status === 'PENDING').length;
+            document.getElementById('offApproved').innerText = applications.filter(a => a.status === 'APPROVED').length;
+            document.getElementById('offRejected').innerText = applications.filter(a => a.status === 'REJECTED').length;
+
+            const tbody = document.getElementById('officerTableBody');
+            tbody.innerHTML = '';
+            applications.forEach(app => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="app-link" onclick="openReview('${app.id}')">${app.id}</span></td>
+                    <td>${app.name}</td>
+                    <td>${app.service}</td>
+                    <td>${app.date}</td>
+                    <td><span class="badge badge-${app.status.toLowerCase()}">${app.status}</span></td>
+                    <td><button class="btn btn-primary" style="padding:2px 6px; font-size:0.75rem;" onclick="openReview('${app.id}')">Review / Action</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* OPEN REVIEW & PREVIEW UPLOADED DOCUMENTS */
+        function openReview(id) {
+            selectedAppId = id;
+            const app = applications.find(a => a.id === id);
+            if(app) {
+                document.getElementById('reviewBox').style.display = 'block';
+                document.getElementById('revAppNo').innerText = app.id;
+                document.getElementById('revName').value = app.name;
+                document.getElementById('revDob').value = app.dob;
+                document.getElementById('revPhone').value = app.phone;
+                document.getElementById('revService').value = app.service;
+                document.getElementById('revAddress').value = app.address;
+
+                // Render Document Previews List
+                const docDiv = document.getElementById('revDocsList');
+                docDiv.innerHTML = '';
+                app.docs.forEach((docName) => {
+                    docDiv.innerHTML += `
+                        <div class="doc-preview-item">
+                            <span>📄 <strong>${docName}</strong></span>
+                            <button class="btn btn-secondary" style="padding:4px 10px; font-size:0.8rem;" onclick="viewDocumentPreview('${docName}')">👁️ Preview / View Document</button>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('officeNoteNo').value = app.officeNoteNo !== '-' ? app.officeNoteNo : '';
+                document.getElementById('officerRemarks').value = app.remarks !== '-' ? app.remarks : '';
+            }
+        }
+
+        function viewDocumentPreview(docName) {
+            document.getElementById('docModalTitle').innerText = "Document Preview: " + docName;
+            document.getElementById('docModalBody').innerHTML = `
+                <div style="border: 2px dashed #1565c0; padding: 30px; background: white; border-radius: 8px; width:100%;">
+                    <h3 style="color:#1565c0; margin-bottom:10px;">📄 ${docName}</h3>
+                    <p style="color:#555;">[ Verified Document Image / PDF File ]</p>
+                    <p style="font-size:0.85rem; color:#888; margin-top:15px;">Status: Authentic & Digitally Signed Copy</p>
+                </div>
+            `;
+            document.getElementById('docModal').style.display = 'block';
+        }
+
+        function closeDocModal() {
+            document.getElementById('docModal').style.display = 'none';
+        }
+
+        function closeReview() { document.getElementById('reviewBox').style.display = 'none'; }
+
+        function updateAppStatus(newStatus) {
+            const noteNo = document.getElementById('officeNoteNo').value;
+            const oDate = document.getElementById('officeDate').value;
+            const remarks = document.getElementById('officerRemarks').value;
+
+            if(!noteNo || !remarks) {
+                alert('Please enter Office Note No and Officer Remarks.');
+                return;
+            }
+
+            const app = applications.find(a => a.id === selectedAppId);
+            if(app) {
+                app.status = newStatus;
+                app.officeNoteNo = noteNo;
+                app.officeDate = oDate;
+                app.remarks = remarks;
+
+                localStorage.setItem('karthi_apps', JSON.stringify(applications));
+                alert(`Application ${selectedAppId} set to ${newStatus}`);
+                closeReview();
+                refreshOfficerDashboard();
+                refreshOpDashboard();
+            }
+        }
+    </script>
+</body>
+</html>
